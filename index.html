@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>three.js webgl - FBX loader</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="shortcut icon" type="image/png" href="https://64.media.tumblr.com/avatar_0b78c1b3fe29_512.png"/>
+        <style>
+        body {
+        margin: 0;
+        background-color: #000;
+        color: #fff;
+        font-family: Monospace;
+        font-size: 13px;
+        line-height: 24px;
+        overscroll-behavior: none;
+        }
+        a {
+        color: #ff0;
+        text-decoration: none;
+        }
+        a:hover {
+        text-decoration: underline;
+        }
+        button {
+        cursor: pointer;
+        text-transform: uppercase;
+        }
+        canvas {
+        display: block;
+        }
+        #info {
+        position: absolute;
+        top: 0px;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        text-align: center;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        pointer-events: none;
+        z-index: 1; /* TODO Solve this in HTML */
+        }
+        a, button, input, select {
+        pointer-events: auto;
+        }
+        .dg.ac {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        z-index: 2 !important; /* TODO Solve this in HTML */
+        }
+        #overlay {
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.7);
+        }
+        #overlay button {
+        background: #ffffff;
+        border: 0;
+        color: #000000;
+        padding: 16px 20px;
+        text-transform: uppercase;
+        cursor:  pointer;
+        }
+        #notSupported {
+        width: 50%;
+        margin: auto;
+        background-color: #f00;
+        margin-top: 20px;
+        padding: 10px;
+        }
+        .blur{
+        opacity:0;
+        filter: blur(100px);
+        }
+        .no-blur{
+        transition: 1s;
+        opacity: 1
+        filter:blur(0px);
+        }
+        body {
+        background-repeat: no-repeat;
+        background-position: center;
+        background-image: url(loading.jpg); /* Путь к фоновому изображению */
+        background-color: #00000; /* Цвет фона */
+        background-size:50%;
+        }
+             button {
+
+  display: inline-block;   
+   background-color: gray;   
+   width: 50px;   
+   height: 50px;   
+   text-align: center;   
+   border-radius: 4px;   
+   margin: 30px;   
+   position: fixed;   
+   bottom: 30px;   
+   right: 30px;    
+   z-index: 1000; 
+   transition: 2s;
+   opacity: 0.2;
+   border-radius: 100px
+}
+
+button:hover {   
+   cursor: pointer;   
+   opacity: 1;
+   outline: none;
+} 
+
+
+button:enabled{
+     cursor: pointer;  
+   outline: none;
+}
+        tumblr_controls, .tmblr-iframe{display:none !important;}
+        </style>
+    </head>
+    <body>
+        <div id='container' class="blur">
+            <div id="info">
+                
+            </div>
+             <button class="no-blur"></button>
+            <script type="module">
+            import * as THREE from 'https://threejs.org/build/three.module.js';
+            import Stats from 'https://threejs.org/examples/jsm/libs/stats.module.js';
+            import { OrbitControls } from 'https://threejs.org/examples/jsm/controls/OrbitControls.js';
+            import { FBXLoader } from 'https://threejs.org/examples/jsm/loaders/FBXLoader.js';
+            
+
+            //post proc
+            import { EffectComposer } from 'https://threejs.org/examples/jsm/postprocessing/EffectComposer.js';
+            import { RenderPass } from 'https://threejs.org/examples/jsm/postprocessing/RenderPass.js';
+            import { UnrealBloomPass } from 'https://threejs.org/examples/jsm/postprocessing/UnrealBloomPass.js';
+            
+            
+            var container, stats, controls;
+            var camera, scene, renderer, light;
+            var clock = new THREE.Clock();
+            //add animation
+            var mixer;
+            
+            init();
+            animate();
+            var action0,action1,action2,action3;
+            var meshObject;
+            var raycaster = new THREE.Raycaster();
+            var mouse = new THREE.Vector2();
+            window.addEventListener('touchstart',touchScreen,false);
+            window.addEventListener( 'click', touchScreen, false );
+                
+            function touchScreen() {
+            
+            if(event.type=='click'){
+            console.log(camera.position ); 
+            console.log(camera.rotation)   
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            }
+            else{
+            mouse.x = ( event.touches[0].clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.touches[0].clientY / window.innerHeight ) * 2 + 1;
+            
+            }
+            raycaster.setFromCamera( mouse, camera );
+           // console.log(meshObject.children)
+            var intersects = raycaster.intersectObjects(meshObject.children);
+            if(intersects[0]!=undefined){
+                console.log(intersects[0].object.name);
+            switch(intersects[0].object.name){
+                case 'right_breast_collider':
+                action1.play().reset();
+                break;
+                case 'left_breast_collider':
+                action0.play().reset();
+                break;
+}
+            
+        }
+
+           // console.log(intersects[0].object.name);
+
+            }
+
+
+            document.getElementById('container').addEventListener('dblclick',function(e) {
+                this.requestFullscreen();
+        });
+
+            //run once
+            function init() {
+            container = document.getElementById('container')
+            camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.3, 2000 );
+
+            
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color( 0x2E2E2E );
+            scene.fog = new THREE.Fog( 0x2E2E2E , 200, 1000 );
+            var light = new THREE.AmbientLight( 'white' ); // soft white light
+            scene.add( light );
+            // scene.add( new CameraHelper( light.shadow.camera ) );
+            
+            // ground
+            var mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2000, 2000 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
+            mesh.material.side=THREE.DoubleSide;
+            mesh.rotation.x = - Math.PI / 2;
+            mesh.receiveShadow = true;
+            scene.add( mesh );
+            var grid = new THREE.GridHelper( 2000, 20, 0x000000, 0x000000 );
+            grid.material.opacity = 0.2;
+            grid.material.transparent = true;
+            //scene.add( grid );
+           
+            
+            //load mesh
+            var manager = new THREE.LoadingManager();
+            manager.onLoad = function ( ) {
+            container.className='no-blur';
+                var button=document.getElementsByTagName("button")[0];
+            button.className='no-blur';
+                button.addEventListener('click',function(){
+                    if(document.fullscreen==false){
+
+                    document.body.requestFullscreen()
+                    }
+                    else{
+                        document.exitFullscreen();
+                    }
+                });
+            
+            };
+
+
+            var textures=[];
+            textures.push(new THREE.TextureLoader().load( 'textures/base.png' ));
+            textures.push(new THREE.TextureLoader().load( 'textures/body.jpg' ));
+            textures.push(new THREE.TextureLoader().load( 'textures/tail.jpg' ));
+            textures.push(new THREE.TextureLoader().load( 'textures/hair1.jpg' ));
+            textures.push(new THREE.TextureLoader().load( 'textures/hair2.jpg' ));
+            textures.push(new THREE.TextureLoader().load( 'textures/dress.jpg' ));
+            textures.push(new THREE.TextureLoader().load( 'textures/rezinka.jpg' ));
+            
+            
+
+            var materials=[];
+            materials.push(new THREE.MeshBasicMaterial({opacity:0.0,transparent:true}));//hide
+            materials.push(new THREE.MeshBasicMaterial( { map: textures[0], morphTargets: true,skinning: true,transparent:true } ));//tex1
+            materials.push(new THREE.MeshBasicMaterial( { map: textures[1], morphTargets: true,skinning: true} ));//tex2
+            materials.push(new THREE.MeshBasicMaterial( { map: textures[2], morphTargets: true,skinning: true } ));//tex3
+            materials.push(new THREE.MeshBasicMaterial( { map: textures[3], morphTargets: true,skinning: true } ));//tex4
+            materials.push(new THREE.MeshBasicMaterial( { map: textures[4], morphTargets: true,skinning: true } ));//tex5
+            materials.push(new THREE.MeshBasicMaterial( { map: textures[5], morphTargets: true,skinning: true } ));//tex6
+        
+             materials.push(new THREE.MeshBasicMaterial( { map: textures[6], morphTargets: true,skinning: true } ));//tex6
+        
+
+
+           
+            
+            var loader = new FBXLoader(manager);
+            loader.load( 'http://127.0.0.1:8080/Desktop/epril/reltime/web/model.fbx', function ( object ) {
+            meshObject=object;
+            // mixer = new THREE.AnimationMixer( object );
+            // action0=mixer.clipAction(object.animations[1]);
+            // action0.setLoop( THREE.LoopOnce )
+            // action1=mixer.clipAction(object.animations[0]);
+            // action1.setLoop( THREE.LoopOnce )
+            // console.log(meshObject.animations)
+            object.traverse( function ( child ) {
+
+             if(child.name =='rezinka'){child.material=materials[7]}           
+             if (child.name=='dress') {child.material=materials[6]}
+             if (child.name=='body') {child.material=materials[2]}
+             if (child.name=='tail') {child.material=materials[3]}
+             if (child.name=='hair1') {child.material=materials[4]}
+             if (child.name=='hair2') {child.material=materials[5]}    
+             if (child.name=='base') {child.material=materials[1]
+                child.material.side=THREE.DoubleSide;
+             }
+
+            // if (child.name=='wings001') {child.material=materials[7]}
+            // if (child.name=='right_breast_collider') {child.material=materials[0]}   
+            //  if (child.name=='left_breast_collider') {child.material=materials[0]}  
+           
+             
+   
+            
+            });
+            
+            scene.add(object);
+            } );
+            
+       
+            
+            
+            
+            renderer = new THREE.WebGLRenderer( { antialias: true } );
+          //  renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.setPixelRatio( window.devicePixelRatio );
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            renderer.shadowMap.enabled = false;
+            container.appendChild( renderer.domElement );
+            
+            
+            controls = new OrbitControls( camera, renderer.domElement );
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set( 0, 0, 0 );
+            camera.position.set( 53,232,198);//x z y
+            controls.update();
+            window.addEventListener( 'resize', onWindowResize, false );
+            // stats
+            stats = new Stats();
+            container.appendChild( stats.dom );
+            }
+            function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            }
+            
+            function animate() {
+            requestAnimationFrame( animate );
+            var delta = clock.getDelta();
+            if ( mixer ) mixer.update( delta );
+            renderer.render( scene, camera );
+            controls.update();
+            stats.update();
+            }
+            </script>
+        </body>
+    </html>
