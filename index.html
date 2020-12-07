@@ -165,8 +165,7 @@ button:enabled{
             function touchScreen() {
             
             if(event.type=='click'){
-            console.log(camera.position ); 
-            console.log(camera.rotation)   
+           
             mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
             mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
             }
@@ -176,20 +175,7 @@ button:enabled{
             
             }
             raycaster.setFromCamera( mouse, camera );
-           // console.log(meshObject.children)
-            var intersects = raycaster.intersectObjects(meshObject.children);
-            if(intersects[0]!=undefined){
-                console.log(intersects[0].object.name);
-            switch(intersects[0].object.name){
-                case 'right_breast_collider':
-                action1.play().reset();
-                break;
-                case 'left_breast_collider':
-                action0.play().reset();
-                break;
-}
-            
-        }
+         
 
            // console.log(intersects[0].object.name);
 
