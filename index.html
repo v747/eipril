@@ -266,7 +266,7 @@ button:enabled{
             object.traverse( function ( child ) {
 
              if(child.name =='rezinka'){child.material=materials[7]}           
-             if (child.name=='dress') {child.material=materials[6]}
+             if (child.name=='dress') {child.material=materials[6],child.material.side=THREE.DoubleSide}
              if (child.name=='body') {child.material=materials[2]}
              if (child.name=='tail') {child.material=materials[3]}
              if (child.name=='hair1') {child.material=materials[4]}
